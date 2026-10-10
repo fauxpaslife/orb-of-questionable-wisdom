@@ -7,6 +7,15 @@ import {verdictLabel} from './verdict-label.js';
 const $ = id => document.getElementById(id);
 const fx = new OrbFX($('room'), $('orb-motion'));
 const sound = new OrbSound();
+export function fitVerdict() {
+  const label = $('verdict');
+  label.style.fontSize = '';
+  let size = parseFloat(getComputedStyle(label).fontSize);
+  while (size > 8 && (label.scrollWidth > label.clientWidth || label.scrollHeight > label.clientHeight)) {
+    label.style.fontSize = `${--size}px`;
+  }
+}
+new ResizeObserver(fitVerdict).observe($('triangle'));
 $('orb').addEventListener('pointerdown', () => sound.unlock());
 document.addEventListener('keydown', event => { if (event.code === 'Space' && !$('settings').open) sound.unlock(); });
 let busy = false;
@@ -90,6 +99,7 @@ function finish(job) {
   const displayVerdict = verdictLabel(result.verdict);
   $('verdict').textContent = displayVerdict;
   $('triangle').classList.toggle('long-label', displayVerdict.length > 12);
+  fitVerdict();
   const voiceSource = result.source === 'model' ? `Voice: ${result.voice_model || 'selected roleplay model'}` : 'Voice: canned fallback';
   $('quip').title = voiceSource;
   $('voice-source').textContent = voiceSource;

@@ -124,10 +124,48 @@ def main():
         expect(page.locator('#status')).to_have_text('Dice only · the oracle is unavailable.')
         assert page.locator('.candle.lit').count() == 0
         assert 'no model confidence' in page.locator('#candles').get_attribute('aria-label').lower()
+        wrapping = page.evaluate("""async () => {
+          const {wrap} = await import('/static/share-card.js');
+          const ctx = document.createElement('canvas').getContext('2d');
+          ctx.font = 'italic 36px Georgia';
+          const sample = 'Yes, but also no—it’s the gas station’s fault for selling it as both.';
+          const lines = wrap(ctx, sample, 950);
+          const narrow = wrap(ctx, 'both both', ctx.measureText('both').width + 1);
+          const long = wrap(ctx, 'x'.repeat(150), 100);
+          return {lines,narrow,longFits:long.every(line => ctx.measureText(line).width <= 100)};
+        }""")
+        assert wrapping['narrow'] == ['both', 'both'], wrapping
+        assert wrapping['longFits'], wrapping
+        assert ' '.join(wrapping['lines']) == 'Yes, but also no—it’s the gas station’s fault for selling it as both.'
+        for width in (320,390,1280):
+            page.set_viewport_size({'width':width,'height':900})
+            page.wait_for_timeout(200)
+            fit = page.evaluate("""async () => {
+              const {fitVerdict} = await import('/static/ui.js');
+              const {VERDICT_LABELS} = await import('/static/verdict-label.js');
+              const triangle = document.getElementById('triangle'), label = document.getElementById('verdict');
+              const failures = [];
+              for (const text of Object.values(VERDICT_LABELS).flat()) {
+                label.textContent = text;
+                triangle.classList.toggle('long-label', text.length > 12);
+                fitVerdict();
+                if (label.scrollWidth > label.clientWidth || label.scrollHeight > label.clientHeight) failures.push(text);
+                const outer = triangle.getBoundingClientRect();
+                const range = document.createRange(); range.selectNodeContents(label);
+                for (const rect of range.getClientRects()) {
+                  const halfWidth = outer.width * ((rect.top - outer.top) / outer.height) / 2;
+                  const center = outer.left + outer.width / 2;
+                  if (rect.left < center - halfWidth - 1 || rect.right > center + halfWidth + 1 || rect.bottom > outer.bottom) failures.push(text + ': polygon');
+                }
+              }
+              return failures;
+            }""")
+            assert not fit, (width,fit)
         assert not errors, errors
         external = [url for url in requests if not url.startswith(f"http://127.0.0.1:{PORT}/") and not url.startswith("data:")]
         assert not external, external
         report = {"checks": ["idle float moves", "murk drifts", "weak shake ignored", "Space triggers exactly once", "stirring then reveal", "question-only request", "Nemotron selectable default", "six confidence candles at 83 percent", "confidence rounding and dice unknown", "PNG download width 1200", "native file-share dispatch and cancellation", "local selectors", "settings suppress shake", "drag triggers exactly once", "mobile question below orb", "390 and 320px layouts fit", "reduced motion", "no JS errors", "no external requests"], "prediction_requests": calls, "js_errors": errors, "external_requests": external}
+        report['checks'] += ['whole-word card wrapping including both', 'oversized token wrapping', 'all grouped labels fit triangle at 320,390,1280px']
         (root / "browser_checks.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
         browser.close()
         print(json.dumps(report, indent=2))

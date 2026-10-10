@@ -3,15 +3,26 @@ export function candleCount(confidence) {
   return confidence == null ? 0 : Math.round(Math.max(0, Math.min(1, confidence)) * 7);
 }
 
-function wrap(ctx, text, width) {
+export function wrap(ctx, text, width) {
   const lines = [];
-  let line = '';
-  for (const character of String(text)) {
-    if (character === '\n' || ctx.measureText(line + character).width > width) {
-      lines.push(line); line = character === '\n' ? '' : character;
-    } else line += character;
+  for (const paragraph of String(text).split('\n')) {
+    let line = '';
+    for (const word of paragraph.trim().split(/\s+/).filter(Boolean)) {
+      const candidate = line ? `${line} ${word}` : word;
+      if (ctx.measureText(candidate).width <= width) { line = candidate; continue; }
+      if (line) { lines.push(line); line = ''; }
+      if (ctx.measureText(word).width <= width) { line = word; continue; }
+      // Split only a single token that cannot fit even on an empty line.
+      const letters = typeof Intl.Segmenter === 'function'
+        ? [...new Intl.Segmenter(undefined, {granularity: 'grapheme'}).segment(word)].map(item => item.segment)
+        : Array.from(word);
+      for (const letter of letters) {
+        if (line && ctx.measureText(line + letter).width > width) { lines.push(line); line = ''; }
+        line += letter;
+      }
+    }
+    lines.push(line);
   }
-  if (line) lines.push(line);
   return lines;
 }
 
@@ -42,14 +53,18 @@ export async function renderCard(result) {
   ctx.shadowBlur = 0; ctx.fillStyle = '#071a2d'; ctx.font = 'bold 29px sans-serif';
   const label = result.displayVerdict || result.verdict;
   ctx.font = `bold ${label.length > 14 ? 22 : 29}px sans-serif`;
-  const verdictLines = [''];
-  for (const word of label.split(' ')) {
-    const last = verdictLines.length - 1;
-    const candidate = verdictLines[last] ? `${verdictLines[last]} ${word}` : word;
-    if (verdictLines[last] && ctx.measureText(candidate).width > 220) verdictLines.push(word);
-    else verdictLines[last] = candidate;
+  // This rectangle fits inside the triangle even at its narrow upper edge.
+  let labelSize = label.length > 14 ? 22 : 29;
+  let verdictLines;
+  while (true) {
+    ctx.font = `bold ${labelSize}px sans-serif`;
+    verdictLines = wrap(ctx, label, 155);
+    if (verdictLines.length * labelSize * 1.2 <= 72 || labelSize <= 8) break;
+    labelSize--;
   }
-  verdictLines.forEach((line, i) => ctx.fillText(line, 600, cy + 34 + i * 29, 235));
+  ctx.textBaseline = 'top';
+  verdictLines.forEach((line, i) => ctx.fillText(line, 600, cy + 30 + i * labelSize * 1.2));
+  ctx.textBaseline = 'alphabetic';
   const count = candleCount(result.confidence);
   for (let i = 0; i < 7; i++) {
     const x = 360 + i * 80, y = cy + 290;
