@@ -20,6 +20,19 @@ The current P2 version includes the single-orb loop, settings, background discov
 
 Decision models use `/v1/systemone`; voice models use `/api/chat`. The configured default oracle is `tev1:4b`; the selectable default voice is `nemotron-3-nano:4b`. Choose another installed local chat model or canned quips in settings. A slow or invalid voice response falls back to a canned line without delaying the reveal.
 
+## Models on Ollama
+
+Browse [Ollama's decision models, newest first](https://ollama.com/search?c=decision&o=newest) for the oracle role. Install a local decision model, then use **Rescan** in settings and select it. The orb discovers candidates and checks `/v1/systemone` compatibility in the background.
+
+The screenshots below use [TEV1 4B](https://ollama.com/library/tev1) for decisions and [Nemotron 3 Nano 4B](https://ollama.com/library/nemotron-3-nano) for voice:
+
+```bat
+ollama pull tev1:4b
+ollama pull nemotron-3-nano:4b
+```
+
+Both roles remain selectable. TEV1 also has a smaller `tev1:0.8b` variant. Nemotron handles the delivery, while the decision model selects the verdict and probabilities.
+
 ## How to read an omen
 
 The selected decision model makes its own judgment from your question and the available context. Its interpretation gives the orb its character: changing decision models can change the verdict and confidence. Nemotron supplies the voice; it cannot change the chosen verdict.
@@ -27,6 +40,20 @@ The selected decision model makes its own judgment from your question and the av
 “ASK LATER” is a legitimate judgment when the model finds insufficient evidence or no matching answer. Questions about an unknown future may receive it often—even confidently. The orb preserves that judgment instead of forcing a more entertaining answer.
 
 Candles show the probability assigned to the **chosen verdict**, including “ASK LATER”: lit count is rounded from probability × 7. More candles mean stronger model confidence in that verdict, not a more positive answer. These probabilities are uncalibrated and do not establish real-world accuracy. Shake strength changes the theatrics only; it never changes the verdict.
+
+## Screenshots
+
+### Local model settings
+
+![Settings with TEV1 4B as decision model and Nemotron 3 Nano 4B as voice](docs/images/settings.png)
+
+### An uncertain future: ASK LATER
+
+![The orb answers ASK LATER to whether the world will ever be at peace, with six confidence candles](docs/images/ask-later.png)
+
+### A factual question: DEFINITELY
+
+![The orb answers DEFINITELY to whether water freezes around 32 degrees Fahrenheit, with five confidence candles](docs/images/definitely.png)
 
 ## Privacy
 

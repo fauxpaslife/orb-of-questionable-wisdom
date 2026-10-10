@@ -12,6 +12,7 @@ FILES = (
     "server.py", "oracle_client.py", "voice_client.py", "db.py", "discovery.py", "quips.py",
     "static/index.html", "static/style.css", "static/ui.js", "static/shake.js", "static/orb-fx.js", "static/share-card.js", "static/sound.js",
     "test_core.py", "test_install.py", "browser_check.py", "build_release.py",
+    "docs/images/settings.png", "docs/images/ask-later.png", "docs/images/definitely.png",
 )
 PATTERNS = {
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----"),
@@ -28,6 +29,10 @@ PATTERNS = {
 def audit(contents):
     findings = []
     for name, data in contents.items():
+        if name.endswith('.png'):
+            if not data.startswith(b'\x89PNG\r\n\x1a\n'):
+                raise RuntimeError(f"Invalid PNG asset: {name}")
+            continue
         text = data.decode("utf-8")
         for kind, pattern in PATTERNS.items():
             for match in pattern.finditer(text):
