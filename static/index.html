@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d17">
+  <title>Orb of Questionable Wisdom</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/style.css">
+  <script type="module" src="/static/ui.js"></script>
+</head>
+<body>
+  <button id="gear" class="gear" aria-label="Open settings" title="Settings">⚙</button>
+  <main class="room" id="room">
+    <header><p class="eyebrow">LOCAL SPIRITS · DUBIOUS ADVICE</p><h1>Orb of <em>Questionable</em> Wisdom</h1><p class="intro">A little uncertainty. A lot of attitude.</p></header>
+    <div class="question-area"><label class="question-label" for="question">WHAT TROUBLES YOU, MORTAL?</label>
+    <textarea id="question" maxlength="500" rows="2" placeholder="Should I text them back?" aria-describedby="gesture-hint" spellcheck="false"></textarea>
+    </div><div class="altar">
+      <div class="candle-ring" id="candles" role="img" aria-label="Confidence candles await a prediction"></div>
+      <div class="orb-shadow" aria-hidden="true"></div>
+      <div class="orb-motion" id="orb-motion">
+        <div class="orb" id="orb" role="button" tabindex="0" aria-label="Shake the orb: drag it or press Space" aria-disabled="false">
+          <div class="murk" aria-hidden="true"><div class="fog fog-one"></div><div class="fog fog-two"></div><div class="fog fog-three"></div></div>
+          <div class="triangle" id="triangle"><span id="verdict"></span></div>
+          <div class="glass" aria-hidden="true"></div>
+          <div class="rim" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="pedestal" aria-hidden="true"></div>
+    </div>
+    <p id="status" class="status" role="status" aria-live="polite">The spirits await your question.</p>
+    <p id="quip" class="quip" aria-live="polite"></p>
+    <p id="detail" class="detail"></p>
+    <p id="confidence-note" class="confidence-note"></p>
+    <div id="share-actions" class="share-actions" hidden><button id="save-card" type="button">Save prophecy</button><button id="share-card" type="button">Share card</button></div>
+    <p id="share-status" class="confidence-note" role="status"></p>
+    <p id="gesture-hint" class="gesture-hint">Whisper a question. Drag the orb to shake it.<br><span>Or press <kbd>Space</kbd> for one polite shake.</span></p>
+    <footer>Uncalibrated probabilities. Questionable wisdom. Entirely on your machine.</footer>
+  </main>
+  <dialog id="settings">
+    <form id="settings-form">
+      <div class="dialog-heading"><h2>Consult the machinery</h2><button type="button" id="close-settings" class="close" aria-label="Close settings">×</button></div>
+      <p class="settings-intro">Local models only. The spirits have no internet privileges.</p>
+      <label for="oracle-model">Decision model</label><select id="oracle-model" name="oracle_model"></select>
+      <label for="voice-model">Voice</label><select id="voice-model" name="voice_model"><option value="">Canned quips · no voice model</option></select>
+      <label class="check"><input id="let-think" type="checkbox">Let it think <small>Model voice may take up to 12 seconds.</small></label>
+      <label class="check"><input id="sound" type="checkbox">Sound <small>Quiet hum, shake rattle, and reveal chime. Off by default.</small></label>
+      <p class="model-note">Voice changes the delivery; it cannot change the verdict.</p>
+      <button type="button" id="enable-motion" hidden>Enable phone shake</button>
+      <p id="discovery-status" class="settings-status" role="status"></p>
+      <p id="memory-warning" class="warning"></p>
+      <p id="settings-error" class="warning" role="alert"></p>
+      <div class="settings-actions"><button type="button" id="rescan">Rescan</button><button type="submit" class="primary">Save settings</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
