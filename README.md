@@ -1,6 +1,6 @@
 # Orb of Questionable Wisdom
 
-A haunted Magic 8 Ball powered by local Ollama models. Ask a question, shake the orb, and receive statistically questionable advice.
+A 'magical orb' powered by local Ollama models. Ask a question, shake the orb, and receive statistically questionable advice.
 
 ## Windows setup
 
