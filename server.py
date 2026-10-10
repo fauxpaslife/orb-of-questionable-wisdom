@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from config import OLLAMA_URL, ROOT, PORT
+from config import OLLAMA_URL, ROOT, PORT, VOICE_TIMEOUT
 from db import Database
 from discovery import Discovery, is_remote, memory_warning
 from oracle_client import OracleClient, OracleError, VERDICTS
@@ -142,10 +142,9 @@ class Room:
             verdict = "conflicted" if prediction["conflicted"] else prediction["verdict"]
             voice_model = settings["voice_model"]
             voice_task = asyncio.create_task(self.deliver_voice(settings, question, verdict, prediction["confidence"], catalog))
-            # Ordinary voice may use only the remaining theatrical window.
-            remaining = max(0, settings["theatrical_delay"] - (time.monotonic() - started))
-            if settings["let_think"] and voice_model:
-                remaining = 12
+            # Voice gets its own bounded window after the oracle finishes.
+            # The theatrical delay remains a minimum, never a voice deadline.
+            remaining = 12 if settings["let_think"] and voice_model else VOICE_TIMEOUT
             voice = {"quip": canned(verdict), "source": "canned", "mutters": "", "hint": ""}
             if remaining > 0:
                 try:
@@ -156,7 +155,7 @@ class Room:
                 voice_task.cancel()
             if not settings["let_think"] or not voice_model:
                 await asyncio.sleep(max(0, settings["theatrical_delay"] - (time.monotonic() - started)))
-            job.update(state="revealed", result={**prediction, **voice, "question": question, "model": model, "mode": "single", "notice": "The spirits are conflicted." if prediction["conflicted"] else ""})
+            job.update(state="revealed", result={**prediction, **voice, "question": question, "model": model, "voice_model": voice_model if voice["source"] == "model" else None, "mode": "single", "notice": "The spirits are conflicted." if prediction["conflicted"] else ""})
         except OracleError as exc:
             await asyncio.sleep(max(0, settings["theatrical_delay"] - (time.monotonic() - started)))
             if exc.kind in ("offline", "missing", "remote"):

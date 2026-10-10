@@ -40,7 +40,16 @@ export async function renderCard(result) {
   ctx.fillStyle = result.conflicted ? '#aba6e1' : '#8dc9ef';
   ctx.beginPath(); ctx.moveTo(600, cy - 120); ctx.lineTo(735, cy + 112); ctx.lineTo(465, cy + 112); ctx.closePath(); ctx.fill();
   ctx.shadowBlur = 0; ctx.fillStyle = '#071a2d'; ctx.font = 'bold 29px sans-serif';
-  ctx.fillText(result.verdict, 600, cy + 52, 235);
+  const label = result.displayVerdict || result.verdict;
+  ctx.font = `bold ${label.length > 14 ? 22 : 29}px sans-serif`;
+  const verdictLines = [''];
+  for (const word of label.split(' ')) {
+    const last = verdictLines.length - 1;
+    const candidate = verdictLines[last] ? `${verdictLines[last]} ${word}` : word;
+    if (verdictLines[last] && ctx.measureText(candidate).width > 220) verdictLines.push(word);
+    else verdictLines[last] = candidate;
+  }
+  verdictLines.forEach((line, i) => ctx.fillText(line, 600, cy + 34 + i * 29, 235));
   const count = candleCount(result.confidence);
   for (let i = 0; i < 7; i++) {
     const x = 360 + i * 80, y = cy + 290;
@@ -51,6 +60,10 @@ export async function renderCard(result) {
   }
   ctx.shadowBlur = 0; ctx.fillStyle = '#9caec1'; ctx.font = '19px sans-serif';
   ctx.fillText(result.confidence == null ? 'Dice only · no model confidence' : `${count} of 7 confidence candles · uncalibrated`, 600, cy + 370);
+  if (label !== result.verdict) {
+    ctx.font = '16px sans-serif';
+    ctx.fillText(`Oracle verdict: ${result.verdict}`, 600, cy + 395);
+  }
   ctx.fillStyle = '#e4edf5'; ctx.font = 'italic 36px Georgia';
   quip.forEach((line, i) => ctx.fillText(line, 600, cy + 435 + i * 47));
   ctx.fillStyle = '#859ab1'; ctx.font = '22px Georgia';

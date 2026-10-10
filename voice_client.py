@@ -4,6 +4,7 @@ import re
 import unicodedata
 
 from quips import QUIPS, SPECIAL, canned
+from config import VOICE_TIMEOUT
 
 SHARED_RULES = "You are the voice of a magic 8 ball. Reply with exactly ONE sentence, under 20 words. Never explain. Never repeat the question. Never use emojis or hashtags. The verdict is already decided; do not change it, only deliver it with attitude. Be funny, a little random, never cruel about real tragedies, health, or money trouble."
 PERSONAS = {
@@ -89,7 +90,7 @@ class VoiceClient:
             return {"quip": canned(verdict), "source": "canned", "mutters": ""}
         # One total budget includes at most one retry. Reveal can also cancel this task.
         try:
-            async with asyncio.timeout(12 if let_think else 2):
+            async with asyncio.timeout(12 if let_think else VOICE_TIMEOUT):
                 for _ in range(2):
                     response = await self.http.post("/api/chat", json={"model": model, "messages": messages(question, verdict, confidence, persona), "stream": False, "think": let_think, "keep_alive": "30m", "options": {"temperature": 0.9, "num_predict": 400 if let_think else 60, "num_ctx": 2048}}, timeout=90)
                     response.raise_for_status()

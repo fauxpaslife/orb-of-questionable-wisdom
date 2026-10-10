@@ -174,9 +174,10 @@ class AsyncTests(unittest.IsolatedAsyncioTestCase):
             room.jobs["id"] = {"state": "listening"}
             settings = {**DEFAULTS, "voice_model": "voice:test", "theatrical_delay": .05}
             start = time.monotonic()
-            await room.predict("id", "Question?", settings)
+            with patch('server.VOICE_TIMEOUT', .1):
+                await room.predict("id", "Question?", settings)
             self.assertLess(time.monotonic() - start, .5)
-            self.assertGreaterEqual(time.monotonic() - start, .045)
+            self.assertGreaterEqual(time.monotonic() - start, .095)
             self.assertEqual(room.jobs["id"]["result"]["source"], "canned")
 
     async def test_unsupported_oracle_is_explicit_dice_only(self):

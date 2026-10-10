@@ -2,6 +2,7 @@ import {OrbFX} from './orb-fx.js';
 import {ShakeInput} from './shake.js';
 import {candleCount, renderCard, downloadCard} from './share-card.js';
 import {OrbSound} from './sound.js';
+import {verdictLabel} from './verdict-label.js';
 
 const $ = id => document.getElementById(id);
 const fx = new OrbFX($('room'), $('orb-motion'));
@@ -46,7 +47,11 @@ function reset() {
   clearInterval(typeTimer);
   $('quip').setAttribute('aria-live', 'polite');
   $('quip').textContent = '';
+  $('quip').removeAttribute('title');
+  $('voice-source').textContent = '';
   $('verdict').textContent = '';
+  $('triangle').removeAttribute('title');
+  $('triangle').removeAttribute('aria-label');
   $('detail').textContent = '';
   $('confidence-note').textContent = '';
   $('share-actions').hidden = true;
@@ -82,7 +87,14 @@ function finish(job) {
     return;
   }
   const result = job.result;
-  $('verdict').textContent = result.verdict;
+  const displayVerdict = verdictLabel(result.verdict);
+  $('verdict').textContent = displayVerdict;
+  $('triangle').classList.toggle('long-label', displayVerdict.length > 12);
+  const voiceSource = result.source === 'model' ? `Voice: ${result.voice_model || 'selected roleplay model'}` : 'Voice: canned fallback';
+  $('quip').title = voiceSource;
+  $('voice-source').textContent = voiceSource;
+  $('triangle').title = `Oracle verdict: ${result.verdict}`;
+  $('triangle').setAttribute('aria-label', `${displayVerdict}. Oracle verdict: ${result.verdict}`);
   const count = candleCount(result.confidence);
   fx.reveal({...result, candleCount: count, flicker: result.conflicted ? 1 : Math.max(0, Math.min(1, result.split || 0))});
   $('candles').setAttribute('aria-label', result.confidence == null ? 'Dice only: no model confidence' : `${count} of 7 confidence candles lit. Probabilities are uncalibrated.`);
@@ -92,7 +104,7 @@ function finish(job) {
   $('confidence-note').title = 'Candles show the probability assigned to the chosen verdict, not a calibrated chance of being right.';
   $('detail').textContent = [result.mode === 'dice-only' ? result.notice : '', result.hint, result.mutters ? `The orb mutters… ${result.mutters}` : ''].filter(Boolean).join('\n');
   const generation = ++cardGeneration;
-  renderCard({...result, question: result.question || $('question').value.trim()}).then(blob => {
+  renderCard({...result, displayVerdict, question: result.question || $('question').value.trim()}).then(blob => {
     if (generation !== cardGeneration) return;
     cardBlob = blob; $('share-actions').hidden = false;
   }).catch(error => { if (generation === cardGeneration) $('share-status').textContent = error.message; });

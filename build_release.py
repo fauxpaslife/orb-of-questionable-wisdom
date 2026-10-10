@@ -13,6 +13,7 @@ FILES = (
     "static/index.html", "static/style.css", "static/ui.js", "static/shake.js", "static/orb-fx.js", "static/share-card.js", "static/sound.js",
     "test_core.py", "test_install.py", "browser_check.py", "build_release.py",
     "docs/images/settings.png", "docs/images/ask-later.png", "docs/images/definitely.png",
+    "static/verdict-label.js",
 )
 PATTERNS = {
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----"),

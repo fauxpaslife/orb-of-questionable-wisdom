@@ -39,6 +39,21 @@ The selected decision model makes its own judgment from your question and the av
 
 “ASK LATER” is a legitimate judgment when the model finds insufficient evidence or no matching answer. Questions about an unknown future may receive it often—even confidently. The orb preserves that judgment instead of forcing a more entertaining answer.
 
+For variety, an ASK LATER reveal randomly reads **THE MISTS REFUSE**, **NOT YET, MORTAL**, **OMEN PENDING**, **THE SPIRITS ABSTAIN**, **INSUFFICIENT OMENS**, or **FATE IS UNDECIDED**. These are display labels for the same verdict; hover over the triangle to see the original oracle verdict. Its probabilities and voice prompt remain unchanged, and the share card keeps the same reveal label with the original verdict noted below.
+
+Every verdict has a group of equivalent reveal labels:
+
+| Oracle verdict | Reveal labels |
+| --- | --- |
+| DEFINITELY | DEFINITELY · THE OMENS AGREE · SO IT SHALL BE · A CERTAIN YES |
+| PROBABLY | PROBABLY · THE OMENS LEAN YES · A LIKELY YES · FATE LOOKS FAVORABLE |
+| ASK LATER | THE MISTS REFUSE · NOT YET, MORTAL · OMEN PENDING · THE SPIRITS ABSTAIN · INSUFFICIENT OMENS · FATE IS UNDECIDED |
+| UNLIKELY | UNLIKELY · THE OMENS LEAN NO · A DOUBTFUL SIGN · FATE LOOKS UNFAVORABLE |
+| NO | NO · THE OMENS SAY NO · THE WAY IS CLOSED · A CERTAIN NO |
+| CURSED | CURSED · AN ILL OMEN · DOOM APPROACHES · BEWARE, MORTAL |
+
+Hover over the quip to see its actual voice source: the generating model name or **Voice: canned fallback**. Keyboard users can focus the quip to hear this source description. The voice model gets its own three-second window after the oracle finishes, including at most one retry. The 1.5-second theatrical delay is a minimum and does not consume that voice window. “Let it think” allows up to 12 seconds instead. Selecting Nemotron does not guarantee that every line was generated: slow, missing, failed, or invalid voice responses use a canned line.
+
 Candles show the probability assigned to the **chosen verdict**, including “ASK LATER”: lit count is rounded from probability × 7. More candles mean stronger model confidence in that verdict, not a more positive answer. These probabilities are uncalibrated and do not establish real-world accuracy. Shake strength changes the theatrics only; it never changes the verdict.
 
 ## Screenshots
